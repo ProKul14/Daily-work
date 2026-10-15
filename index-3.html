@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="Daily Diary - दूध अखबार हिसाब Vendor Customer">
+  <title>Daily Diary</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%230d9488' width='100' height='100' rx='20'/%3E%3Ctext y='68' x='50' text-anchor='middle' font-size='50' fill='white'%3E📔%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --primary: #0d9488; --primary-dark: #0f766e; --primary-light: #ccfbf1;
+      --accent: #f59e0b; --bg: #f0fdfa; --card: #fff; --text: #134e4a;
+      --muted: #5eead4; --text-muted: #64748b; --danger: #dc2626;
+      --success: #16a34a; --border: #99f6e4; --shadow: 0 4px 20px rgba(13,148,136,.12);
+    }
+    .mode-vendor {
+      --primary: #0369a1; --primary-dark: #0c4a6e; --primary-light: #e0f2fe;
+      --bg: #f0f9ff; --text: #0c4a6e; --border: #bae6fd; --muted: #7dd3fc;
+      --shadow: 0 4px 20px rgba(3,105,161,.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.45; }
+    .container { max-width: 520px; margin: 0 auto; padding: 12px 14px 80px; }
+    header { text-align: center; padding: 16px 8px 8px; }
+    header h1 { font-size: 1.55rem; font-weight: 800; color: var(--primary-dark); }
+    header p { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }
+    .mode-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+    .mode-bar button {
+      flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 12px;
+      background: var(--card); font-weight: 700; cursor: pointer; color: var(--text); font-size: .95rem;
+    }
+    .mode-bar button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tab-btn {
+      padding: 8px 12px; border: none; border-radius: 999px; background: var(--card);
+      color: var(--text); font-size: .8rem; font-weight: 600; cursor: pointer;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 14px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+    }
+    .card h3 { font-size: 1rem; margin-bottom: 12px; color: var(--primary-dark); }
+    label { display: block; font-size: .78rem; font-weight: 600; margin-bottom: 4px; color: var(--text-muted); }
+    input, select, textarea {
+      width: 100%; padding: 11px 12px; border: 2px solid var(--border); border-radius: 10px;
+      font-size: 1rem; margin-bottom: 10px; background: #fff; color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 120px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px 16px; border: none; border-radius: 12px; font-weight: 700;
+      font-size: .92rem; cursor: pointer; width: 100%; margin-top: 4px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-accent { background: var(--accent); color: #78350f; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger { background: #fee2e2; color: var(--danger); }
+    .btn-sm { padding: 10px 12px; width: auto; font-size: .85rem; margin-top: 0; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .date-wrap { display: flex; gap: 6px; align-items: center; }
+    .date-wrap input[type="text"] { flex: 1; margin-bottom: 0; }
+    .cal-btn { padding: 11px 12px; border: 2px solid var(--border); border-radius: 10px; background: #fff; cursor: pointer; font-size: 1.1rem; }
+    input[type="date"].hidden-date { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+    .qty-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+    .qty-btn {
+      padding: 10px 4px; border: 2px solid var(--border); border-radius: 10px;
+      background: #fff; font-weight: 700; cursor: pointer; font-size: .9rem; color: var(--text);
+    }
+    .qty-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .slot-box { display: none; margin-bottom: 10px; padding: 12px; background: var(--primary-light); border-radius: 12px; }
+    .slot-box.show { display: block; }
+    .slot-options { display: flex; gap: 8px; }
+    .slot-btn {
+      flex: 1; padding: 12px 8px; border: 2px solid var(--border); border-radius: 12px;
+      background: #fff; font-weight: 700; cursor: pointer; font-size: .85rem;
+    }
+    .slot-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .slot-btn:disabled { opacity: .45; }
+    .slot-status { display: block; font-size: .7rem; font-weight: 500; margin-top: 4px; opacity: .85; }
+    .info-banner {
+      display: none; padding: 10px 12px; background: #fef3c7; color: #92400e;
+      border-radius: 10px; font-size: .82rem; margin-bottom: 10px; font-weight: 600;
+    }
+    .info-banner.show { display: block; }
+    .entry-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border); gap: 8px;
+    }
+    .entry-item:last-child { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .72rem; font-weight: 700; }
+    .badge-milk { background: #dbeafe; color: #1d4ed8; }
+    .badge-newspaper { background: #fef3c7; color: #b45309; }
+    .badge-other { background: #e2e8f0; color: #475569; }
+    .entry-amount { font-weight: 800; white-space: nowrap; }
+    .empty-state { text-align: center; padding: 28px 12px; color: var(--text-muted); font-size: .9rem; }
+    .summary-box {
+      background: var(--primary-light); border-radius: 12px; padding: 12px; text-align: center; flex: 1; min-width: 90px;
+    }
+    .summary-box .label { font-size: .72rem; color: var(--text-muted); }
+    .summary-box .value { font-size: 1.2rem; font-weight: 800; color: var(--primary-dark); }
+    .cust-card {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; background: #fff;
+    }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--primary-dark); color: #fff; padding: 12px 20px; border-radius: 12px;
+      font-weight: 600; font-size: .88rem; z-index: 999; opacity: 0; transition: .3s; max-width: 90%;
+      text-align: center; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .install-banner {
+      display: none; background: var(--primary); color: #fff; padding: 10px 14px;
+      border-radius: 12px; margin-bottom: 12px; font-size: .85rem; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .install-banner.show { display: flex; }
+    .install-banner button { background: #fff; color: var(--primary-dark); border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    table.reg { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    table.reg th, table.reg td { border: 1px solid var(--border); padding: 6px 4px; text-align: center; }
+    table.reg th { background: var(--primary-light); }
+    .hint { font-size: .75rem; color: var(--text-muted); margin-top: 2px; margin-bottom: 8px; }
+    footer { text-align: center; font-size: .75rem; color: var(--text-muted); padding: 16px; }
+    #printArea { display: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📔 Daily Diary</h1>
+      <p id="headerSub">दैनिक डायरी • Vendor / Customer</p>
+    </header>
+
+    <div class="install-banner no-print" id="installBanner">
+      <span>होम स्क्रीन पर इंस्टॉल करें</span>
+      <button type="button" id="installBtn">Install</button>
+    </div>
+
+    <div class="mode-bar no-print">
+      <button type="button" class="active" data-mode="customer" id="modeCustomer">👤 Customer</button>
+      <button type="button" data-mode="vendor" id="modeVendor">🚚 Vendor</button>
+    </div>
+
+    <div class="tabs no-print" id="tabsCustomer">
+      <button class="tab-btn active" data-tab="c-entry">➕ एंट्री</button>
+      <button class="tab-btn" data-tab="c-log">📋 लॉग</button>
+      <button class="tab-btn" data-tab="c-reg">📒 रजिस्टर</button>
+      <button class="tab-btn" data-tab="c-pay">💰 पेमेंट</button>
+      <button class="tab-btn" data-tab="c-set">⚙️</button>
+    </div>
+    <div class="tabs no-print" id="tabsVendor" style="display:none;">
+      <button class="tab-btn active" data-tab="v-cust">👥 कस्टमर</button>
+      <button class="tab-btn" data-tab="v-entry">➕ एंट्री</button>
+      <button class="tab-btn" data-tab="v-log">📋 लॉग</button>
+      <button class="tab-btn" data-tab="v-reg">📒 रजिस्टर</button>
+      <button class="tab-btn" data-tab="v-bill">🧾 बिल</button>
+      <button class="tab-btn" data-tab="v-set">⚙️</button>
+    </div>
+
+    <!-- ========== CUSTOMER PANELS ========== -->
+    <div class="panel active" id="c-entry">
+      <div class="card">
+        <h3>आज की एंट्री</h3>
+        <label>तारीख (DD/MM/YYYY)</label>
+        <div class="date-wrap">
+          <input type="text" id="cDateDisp" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off">
+          <button type="button" class="cal-btn" id="cCalBtn">📅</button>
+          <input type="date" class="hidden-date" id="cDateHid">
+        </div>
+        <label>आइटम — 🕐 सुबह/शाम ऑन-ऑफ</label>
+        <div class="row" style="align-items:center; margin-bottom:6px;">
+          <select id="cItem" style="flex:1; margin-bottom:0;"></select>
+          <button type="button" class="btn btn-sm btn-accent" id="cToggleSlot" title="सुबह/शाम">🕐</button>
+          <button type="button" class="btn btn-sm btn-success" id="cAddItem">➕</button>
+          <button type="button" class="btn btn-sm btn-danger" id="cDelItem">🗑️</button>
+        </div>
+        <div class="hint" id="cItemHint"></div>
+        <div class="slot-box" id="cSlotBox">
+          <div class="hint" style="margin-bottom:8px;">समय चुनें</div>
+          <div class="slot-options">
+            <button type="button" class="slot-btn" id="cSlotM" data-slot="Morning">🌅 सुबह<span class="slot-status" id="cStM"></span></button>
+            <button type="button" class="slot-btn" id="cSlotE" data-slot="Evening">🌆 शाम<span class="slot-status" id="cStE"></span></button>
+          </div>
+        </div>
+        <div class="info-banner" id="cInfo"></div>
+        <label>मात्रा</label>
+        <div class="qty-grid" id="cQtyGrid"></div>
+        <input type="number" id="cQtyManual" step="0.5" min="0.1" placeholder="कस्टम मात्रा" style="display:none;">
+        <label>रेट (₹)</label>
+        <input type="number" id="cRate" step="0.5" min="0" value="60">
+        <label>नोट</label>
+        <input type="text" id="cNote" placeholder="वैकल्पिक">
+        <button type="button" class="btn btn-primary" id="cSave">💾 सेव करें</button>
+        <div class="row" style="margin-top:10px;">
+          <button type="button" class="btn btn-accent btn-sm" id="cQuickM">🥛 सुबह</button>
+          <button type="button" class="btn btn-accent btn-sm" id="cQuickE">🥛 शाम</button>
+          <button type="button" class="btn btn-accent btn-sm" id="cQuickN">📰 अखबार</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="c-log">
+      <div class="card">
+        <h3>एंट्री लॉग</h3>
+        <label>महीना</label>
+        <select id="cLogMonth"></select>
+        <div id="cLogList"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c-reg">
+      <div class="card">
+        <h3>रजिस्टर</h3>
+        <label>महीना</label>
+        <select id="cRegMonth"></select>
+        <div class="row" style="margin:10px 0;" id="cRegSummary"></div>
+        <div style="overflow-x:auto;" id="cRegTable"></div>
+        <button type="button" class="btn btn-primary" id="cPrintReg">🖨️ / PDF</button>
+      </div>
+    </div>
+
+    <div class="panel" id="c-pay">
+      <div class="card">
+        <h3>पेमेंट</h3>
+        <label>तारीख</label>
+        <div class="date-wrap">
+          <input type="text" id="cPayDateDisp" placeholder="DD/MM/YYYY" maxlength="10">
+          <button type="button" class="cal-btn" id="cPayCal">📅</button>
+          <input type="date" class="hidden-date" id="cPayDateHid">
+        </div>
+        <label>राशि (₹)</label>
+        <input type="number" id="cPayAmt" min="1" step="1">
+        <label>वेंडर नाम</label>
+        <input type="text" id="cPayVendor" list="cVendorList" placeholder="वेंडर">
+        <datalist id="cVendorList"></datalist>
+        <label>नोट</label>
+        <input type="text" id="cPayNote">
+        <button type="button" class="btn btn-success" id="cPaySave">💰 पेमेंट सेव</button>
+        <label style="margin-top:14px;">महीना</label>
+        <select id="cPayMonth"></select>
+        <div id="cPayList"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="c-set">
+      <div class="card">
+        <h3>सेटिंग्स / रेट</h3>
+        <label>दूध रेट</label><input type="number" id="cRateMilk" step="0.5" value="60">
+        <label>अखबार रेट</label><input type="number" id="cRateNews" step="0.5" value="10">
+        <label>अन्य रेट</label><input type="number" id="cRateOther" step="0.5" value="20">
+        <button type="button" class="btn btn-primary" id="cSaveRates">💾 रेट सेव</button>
+        <button type="button" class="btn btn-accent" id="cExport">📤 JSON एक्सपोर्ट</button>
+        <button type="button" class="btn btn-accent" id="cImport">📥 JSON इंपोर्ट</button>
+        <input type="file" id="cImportFile" accept=".json" style="display:none;">
+        <button type="button" class="btn btn-danger" id="cClear">⚠️ डेटा मिटाएँ</button>
+      </div>
+    </div>
+
+    <!-- ========== VENDOR PANELS ========== -->
+    <div class="panel" id="v-cust">
+      <div class="card">
+        <h3>कस्टमर</h3>
+        <label>नाम</label><input type="text" id="vCustName" placeholder="नाम">
+        <label>फोन</label><input type="tel" id="vCustPhone" placeholder="WhatsApp नंबर">
+        <label>पता</label><input type="text" id="vCustAddr" placeholder="वैकल्पिक">
+        <button type="button" class="btn btn-primary" id="vCustSave">💾 सेव</button>
+        <div id="vCustList" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="v-entry">
+      <div class="card">
+        <h3>एंट्री</h3>
+        <label>कस्टमर</label>
+        <select id="vEntryCust"></select>
+        <label>तारीख (DD/MM/YYYY)</label>
+        <div class="date-wrap">
+          <input type="text" id="vDateDisp" placeholder="DD/MM/YYYY" maxlength="10">
+          <button type="button" class="cal-btn" id="vCalBtn">📅</button>
+          <input type="date" class="hidden-date" id="vDateHid">
+        </div>
+        <label>आइटम — 🕐 सुबह/शाम</label>
+        <div class="row" style="align-items:center; margin-bottom:6px;">
+          <select id="vItem" style="flex:1; margin-bottom:0;"></select>
+          <button type="button" class="btn btn-sm btn-accent" id="vToggleSlot">🕐</button>
+          <button type="button" class="btn btn-sm btn-success" id="vAddItem">➕</button>
+          <button type="button" class="btn btn-sm btn-danger" id="vDelItem">🗑️</button>
+        </div>
+        <div class="hint" id="vItemHint"></div>
+        <div class="slot-box" id="vSlotBox">
+          <div class="slot-options">
+            <button type="button" class="slot-btn" id="vSlotM" data-slot="Morning">🌅 सुबह<span class="slot-status" id="vStM"></span></button>
+            <button type="button" class="slot-btn" id="vSlotE" data-slot="Evening">🌆 शाम<span class="slot-status" id="vStE"></span></button>
+          </div>
+        </div>
+        <div class="info-banner" id="vInfo"></div>
+        <label>मात्रा</label>
+        <div class="qty-grid" id="vQtyGrid"></div>
+        <input type="number" id="vQtyManual" step="0.5" min="0.1" placeholder="कस्टम" style="display:none;">
+        <label>रेट</label>
+        <input type="number" id="vRate" step="0.5" min="0" value="60">
+        <label>नोट</label>
+        <input type="text" id="vNote">
+        <button type="button" class="btn btn-primary" id="vSave">💾 सेव</button>
+        <div class="row" style="margin-top:10px;">
+          <button type="button" class="btn btn-accent btn-sm" id="vQuickM">🥛 सुबह</button>
+          <button type="button" class="btn btn-accent btn-sm" id="vQuickE">🥛 शाम</button>
+          <button type="button" class="btn btn-accent btn-sm" id="vQuickN">📰</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="v-log">
+      <div class="card">
+        <h3>लॉग</h3>
+        <label>कस्टमर</label><select id="vLogCust"></select>
+        <label>महीना</label><select id="vLogMonth"></select>
+        <div id="vLogList"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="v-reg">
+      <div class="card">
+        <h3>रजिस्टर</h3>
+        <label>कस्टमर</label><select id="vRegCust"></select>
+        <label>महीना</label><select id="vRegMonth"></select>
+        <div class="row" style="margin:10px 0;" id="vRegSummary"></div>
+        <div style="overflow-x:auto;" id="vRegTable"></div>
+        <button type="button" class="btn btn-primary" id="vPrintReg">🖨️ / PDF</button>
+      </div>
+    </div>
+
+    <div class="panel" id="v-bill">
+      <div class="card">
+        <h3>बिल + WhatsApp</h3>
+        <label>कस्टमर</label><select id="vBillCust"></select>
+        <label>महीना</label><select id="vBillMonth"></select>
+        <button type="button" class="btn btn-primary" id="vGenBill">🧾 बिल बनाएँ</button>
+        <div id="vBillPreview" style="display:none; margin-top:12px;">
+          <pre id="vBillText" style="white-space:pre-wrap; background:var(--primary-light); padding:12px; border-radius:12px; font-size:.85rem;"></pre>
+          <button type="button" class="btn btn-success" id="vWaShare">📲 WhatsApp शेयर</button>
+          <button type="button" class="btn btn-accent" id="vCopyBill">📋 कॉपी</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="v-set">
+      <div class="card">
+        <h3>वेंडर सेटिंग्स</h3>
+        <label>आपका नाम</label><input type="text" id="vName" placeholder="वेंडर नाम">
+        <label>फोन</label><input type="tel" id="vPhone">
+        <label>दूध रेट</label><input type="number" id="vRateMilk" step="0.5" value="60">
+        <label>अखबार रेट</label><input type="number" id="vRateNews" step="0.5" value="10">
+        <label>अन्य</label><input type="number" id="vRateOther" step="0.5" value="20">
+        <button type="button" class="btn btn-primary" id="vSaveCfg">💾 सेव</button>
+        <button type="button" class="btn btn-accent" id="vExport">📤 JSON एक्सपोर्ट</button>
+        <button type="button" class="btn btn-accent" id="vImport">📥 JSON इंपोर्ट</button>
+        <input type="file" id="vImportFile" accept=".json" style="display:none;">
+        <button type="button" class="btn btn-danger" id="vClear">⚠️ डेटा मिटाएँ</button>
+      </div>
+    </div>
+
+    <footer class="no-print">Daily Diary PWA • Offline • Single file</footer>
+  </div>
+  <div id="printArea"></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+(function () {
+  'use strict';
+
+  /* ========== PWA ========== */
+  var MANIFEST = {
+    name: 'Daily Diary',
+    short_name: 'Daily Diary',
+    start_url: '.',
+    display: 'standalone',
+    background_color: '#f0fdfa',
+    theme_color: '#0d9488',
+    orientation: 'portrait-primary',
+    icons: [{
+      src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%230d9488' width='100' height='100' rx='20'/%3E%3Ctext y='68' x='50' text-anchor='middle' font-size='48'%3E📔%3C/text%3E%3C/svg%3E",
+      sizes: 'any',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }]
+  };
+  var manBlob = new Blob([JSON.stringify(MANIFEST)], { type: 'application/json' });
+  var manUrl = URL.createObjectURL(manBlob);
+  var link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = manUrl;
+  document.head.appendChild(link);
+
+  var swCode = "self.addEventListener('install',function(e){self.skipWaiting();e.waitUntil(caches.open('dd-v1').then(function(c){return c.addAll(['./','./index.html']);}).catch(function(){}));});self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).then(function(res){var cl=res.clone();if(e.request.method==='GET'&&res.status===200){caches.open('dd-v1').then(function(c){c.put(e.request,cl);});}return res;}).catch(function(){return caches.match('./index.html');});}));});";
+  if ('serviceWorker' in navigator) {
+    try {
+      var swBlob = new Blob([swCode], { type: 'application/javascript' });
+      var swUrl = URL.createObjectURL(swBlob);
+      navigator.serviceWorker.register(swUrl, { scope: './' }).catch(function () {
+        // blob SW may fail on some hosts; ignore
+      });
+    } catch (e) {}
+  }
+
+  var deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
+  });
+  document.getElementById('installBtn').addEventListener('click', function () {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function () {
+      deferredPrompt = null;
+      document.getElementById('installBanner').classList.remove('show');
+    });
+  });
+
+  /* ========== UTILS ========== */
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 2600);
+  }
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function toDisplay(iso) {
+    if (!iso || iso.length < 10) return '';
+    var p = iso.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+  function toISO(disp) {
+    if (!disp) return '';
+    var p = disp.replace(/\./g, '/').replace(/-/g, '/').split('/');
+    if (p.length !== 3) return '';
+    var dd = p[0].padStart(2, '0'), mm = p[1].padStart(2, '0'), yy = p[2];
+    if (yy.length === 2) yy = '20' + yy;
+    return yy + '-' + mm + '-' + dd;
+  }
+  function monthKey(iso) { return iso ? iso.slice(0, 7) : ''; }
+  function monthName(ym) {
+    if (!ym) return '';
+    var m = ['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
+    var p = ym.split('-');
+    return m[parseInt(p[1], 10) - 1] + ' ' + p[0];
+  }
+  function uid() { return Date.now() + Math.floor(Math.random() * 1000); }
+
+  function setupDate(dispId, hidId, calId, onChange) {
+    var disp = document.getElementById(dispId);
+    var hid = document.getElementById(hidId);
+    var cal = document.getElementById(calId);
+    function syncFromHid() {
+      disp.value = toDisplay(hid.value);
+      if (onChange) onChange();
+    }
+    function syncFromDisp() {
+      var iso = toISO(disp.value);
+      if (iso) { hid.value = iso; if (onChange) onChange(); }
+    }
+    hid.value = todayISO();
+    disp.value = toDisplay(hid.value);
+    cal.addEventListener('click', function () {
+      try { hid.showPicker(); } catch (e) { hid.click(); }
+    });
+    hid.addEventListener('change', syncFromHid);
+    disp.addEventListener('change', syncFromDisp);
+    disp.addEventListener('blur', syncFromDisp);
+  }
+
+  var QTYS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+  function buildQtyGrid(gridId, manualId, state) {
+    var grid = document.getElementById(gridId);
+    var manual = document.getElementById(manualId);
+    grid.innerHTML = '';
+    QTYS.forEach(function (q) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'qty-btn' + (state.qty === q ? ' active' : '');
+      b.textContent = q;
+      b.addEventListener('click', function () {
+        state.qty = q;
+        state.custom = false;
+        manual.style.display = 'none';
+        grid.querySelectorAll('.qty-btn').forEach(function (x) { x.classList.remove('active'); });
+        b.classList.add('active');
+        var last = grid.querySelector('[data-manual]');
+        if (last) last.classList.remove('active');
+      });
+      grid.appendChild(b);
+    });
+    var mb = document.createElement('button');
+    mb.type = 'button';
+    mb.className = 'qty-btn';
+    mb.dataset.manual = '1';
+    mb.textContent = '✏️';
+    mb.addEventListener('click', function () {
+      state.custom = true;
+      manual.style.display = 'block';
+      grid.querySelectorAll('.qty-btn').forEach(function (x) { x.classList.remove('active'); });
+      mb.classList.add('active');
+      manual.focus();
+    });
+    grid.appendChild(mb);
+  }
+  function getQty(state, manualId) {
+    if (state.custom) {
+      var v = parseFloat(document.getElementById(manualId).value);
+      return v > 0 ? v : 0;
+    }
+    return state.qty || 1;
+  }
+
+  /* ========== STORAGE ========== */
+  var CK = 'dd_customer_v1';
+  var VK = 'dd_vendor_v1';
+
+  function loadC() {
+    try {
+      return JSON.parse(localStorage.getItem(CK) || 'null') || {
+        entries: [], payments: [], rates: { Milk: 60, Newspaper: 10, Other: 20 },
+        items: [
+          { id: 'Milk', label: '🥛 दूध', slots: true },
+          { id: 'Newspaper', label: '📰 अखबार', slots: false },
+          { id: 'Other', label: '📦 अन्य', slots: false }
+        ]
+      };
+    } catch (e) {
+      return { entries: [], payments: [], rates: { Milk: 60, Newspaper: 10, Other: 20 }, items: [] };
+    }
+  }
+  function saveC(d) { localStorage.setItem(CK, JSON.stringify(d)); }
+
+  function loadV() {
+    try {
+      return JSON.parse(localStorage.getItem(VK) || 'null') || {
+        customers: [], entries: [], payments: [],
+        config: { Milk: 60, Newspaper: 10, Other: 20, vendorName: '', vendorPhone: '' },
+        items: [
+          { id: 'Milk', label: '🥛 दूध', slots: true },
+          { id: 'Newspaper', label: '📰 अखबार', slots: false },
+          { id: 'Other', label: '📦 अन्य', slots: false }
+        ]
+      };
+    } catch (e) {
+      return { customers: [], entries: [], payments: [], config: { Milk: 60, Newspaper: 10, Other: 20, vendorName: '', vendorPhone: '' }, items: [] };
+    }
+  }
+  function saveV(d) { localStorage.setItem(VK, JSON.stringify(d)); }
+
+  var C = loadC();
+  var V = loadV();
+  var mode = 'customer';
+  var cSlot = null, vSlot = null;
+  var cQty = { qty: 1, custom: false };
+  var vQty = { qty: 1, custom: false };
+  var lastBill = '';
+
+  /* ========== MODE / TABS ========== */
+  function setMode(m) {
+    mode = m;
+    document.body.classList.toggle('mode-vendor', m === 'vendor');
+    document.getElementById('modeCustomer').classList.toggle('active', m === 'customer');
+    document.getElementById('modeVendor').classList.toggle('active', m === 'vendor');
+    document.getElementById('tabsCustomer').style.display = m === 'customer' ? 'flex' : 'none';
+    document.getElementById('tabsVendor').style.display = m === 'vendor' ? 'flex' : 'none';
+    document.getElementById('headerSub').textContent = m === 'vendor'
+      ? 'Vendor • कस्टमर हिसाब • बिल • WhatsApp'
+      : 'Customer • निजी दैनिक हिसाब';
+    document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+    if (m === 'customer') {
+      document.getElementById('c-entry').classList.add('active');
+      document.querySelectorAll('#tabsCustomer .tab-btn').forEach(function (b, i) { b.classList.toggle('active', i === 0); });
+      cRefreshAll();
+    } else {
+      document.getElementById('v-cust').classList.add('active');
+      document.querySelectorAll('#tabsVendor .tab-btn').forEach(function (b, i) { b.classList.toggle('active', i === 0); });
+      vRefreshAll();
+    }
+  }
+  document.getElementById('modeCustomer').addEventListener('click', function () { setMode('customer'); });
+  document.getElementById('modeVendor').addEventListener('click', function () { setMode('vendor'); });
+
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tab = btn.dataset.tab;
+      var parent = btn.parentElement;
+      parent.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+      document.getElementById(tab).classList.add('active');
+      if (tab === 'c-log') renderCLog();
+      if (tab === 'c-reg') renderCReg();
+      if (tab === 'c-pay') renderCPay();
+      if (tab === 'v-log') renderVLog();
+      if (tab === 'v-reg') renderVReg();
+      if (tab === 'v-cust') renderVCust();
+    });
+  });
+
+  /* ========== ITEMS ========== */
+  function getItem(list, id) {
+    return list.find(function (i) { return i.id === id; });
+  }
+  function populateItems(selId, items, rates) {
+    var sel = document.getElementById(selId);
+    var cur = sel.value;
+    sel.innerHTML = items.map(function (it) {
+      return '<option value="' + it.id + '">' + it.label + (it.slots ? ' 🕐' : '') + '</option>';
+    }).join('');
+    if (cur && items.some(function (i) { return i.id === cur; })) sel.value = cur;
+    else if (items.length) sel.value = items[0].id;
+    var r = rates[sel.value] || rates.Other || 20;
+    return r;
+  }
+
+  /* ========== CUSTOMER LOGIC ========== */
+  function cHasSlot(date, item, slot) {
+    return C.entries.some(function (e) { return e.date === date && e.item === item && e.slot === slot; });
+  }
+  function cHasOnce(date, item) {
+    return C.entries.some(function (e) { return e.date === date && e.item === item; });
+  }
+  function cUpdateSlots() {
+    var item = document.getElementById('cItem').value;
+    var date = document.getElementById('cDateHid').value;
+    var it = getItem(C.items, item);
+    var box = document.getElementById('cSlotBox');
+    var info = document.getElementById('cInfo');
+    var save = document.getElementById('cSave');
+    var hint = document.getElementById('cItemHint');
+    cSlot = null;
+    document.getElementById('cSlotM').classList.remove('active');
+    document.getElementById('cSlotE').classList.remove('active');
+    if (it && it.slots) {
+      hint.textContent = '✓ सुबह/शाम ऑन — दिन में अधिकतम 2';
+      box.classList.add('show');
+      info.classList.remove('show');
+      var mT = cHasSlot(date, item, 'Morning');
+      var eT = cHasSlot(date, item, 'Evening');
+      document.getElementById('cSlotM').disabled = mT;
+      document.getElementById('cSlotE').disabled = eT;
+      document.getElementById('cStM').textContent = mT ? '✓ सेव है' : 'उपलब्ध';
+      document.getElementById('cStE').textContent = eT ? '✓ सेव है' : 'उपलब्ध';
+      if (mT && eT) { info.textContent = '⚠️ सुबह+शाम दोनों हो चुकीं'; info.classList.add('show'); save.disabled = true; }
+      else save.disabled = false;
+    } else {
+      hint.textContent = 'सुबह/शाम ऑफ — 1 बार/दिन';
+      box.classList.remove('show');
+      if (item && cHasOnce(date, item)) {
+        info.textContent = '⚠️ आज यह आइटम पहले से सेव है';
+        info.classList.add('show');
+        save.disabled = true;
+      } else { info.classList.remove('show'); save.disabled = false; }
+    }
+  }
+  function cAddEntry(date, item, qty, rate, note, slot) {
+    var it = getItem(C.items, item);
+    if (it && it.slots) {
+      if (!slot) { toast('सुबह/शाम चुनें'); return false; }
+      if (cHasSlot(date, item, slot)) { toast('यह स्लॉट पहले से है'); return false; }
+    } else if (cHasOnce(date, item)) { toast('आज पहले से सेव है'); return false; }
+    C.entries.push({ id: uid(), date: date, item: item, qty: qty, rate: rate, note: note || '', slot: slot || null });
+    saveC(C);
+    toast('✅ सेव हो गया');
+    cUpdateSlots();
+    return true;
+  }
+  function cMonths() {
+    var s = {};
+    C.entries.forEach(function (e) { s[monthKey(e.date)] = 1; });
+    C.payments.forEach(function (p) { s[monthKey(p.date)] = 1; });
+    s[todayISO().slice(0, 7)] = 1;
+    return Object.keys(s).sort().reverse();
+  }
+  function fillMonths(ids) {
+    var months = cMonths();
+    ids.forEach(function (id) {
+      var sel = document.getElementById(id);
+      if (!sel) return;
+      var cur = sel.value;
+      sel.innerHTML = months.map(function (m) { return '<option value="' + m + '">' + monthName(m) + '</option>'; }).join('');
+      if (cur && months.indexOf(cur) >= 0) sel.value = cur;
+      else if (months.length) sel.value = months[0];
+    });
+  }
+  function renderCLog() {
+    fillMonths(['cLogMonth']);
+    var m = document.getElementById('cLogMonth').value;
+    var list = C.entries.filter(function (e) { return monthKey(e.date) === m; })
+      .sort(function (a, b) { return b.date.localeCompare(a.date); });
+    var el = document.getElementById('cLogList');
+    if (!list.length) { el.innerHTML = '<div class="empty-state">कोई एंट्री नहीं</div>'; return; }
+    el.innerHTML = list.map(function (e) {
+      var it = getItem(C.items, e.item);
+      var name = it ? it.label : e.item;
+      var slot = e.slot ? ' (' + (e.slot === 'Morning' ? 'सुबह' : 'शाम') + ')' : '';
+      var badge = e.item === 'Milk' ? 'badge-milk' : e.item === 'Newspaper' ? 'badge-newspaper' : 'badge-other';
+      return '<div class="entry-item"><div><span class="badge ' + badge + '">' + name + slot + '</span><div class="hint">' + toDisplay(e.date) + ' • ' + e.qty + ' × ₹' + e.rate + (e.note ? ' • ' + e.note : '') + '</div></div><div style="display:flex;align-items:center;gap:8px;"><span class="entry-amount">₹' + (e.qty * e.rate).toFixed(0) + '</span><button type="button" class="btn btn-sm btn-danger" data-del="' + e.id + '">🗑️</button></div></div>';
+    }).join('');
+    el.querySelectorAll('[data-del]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        C.entries = C.entries.filter(function (e) { return e.id != b.dataset.del; });
+        saveC(C); renderCLog(); toast('हटाया');
+      });
+    });
+  }
+  function renderCReg() {
+    fillMonths(['cRegMonth']);
+    var m = document.getElementById('cRegMonth').value;
+    var list = C.entries.filter(function (e) { return monthKey(e.date) === m; });
+    var by = {};
+    list.forEach(function (e) {
+      if (!by[e.date]) by[e.date] = { milkM: 0, milkE: 0, news: 0, other: 0, amt: 0 };
+      if (e.item === 'Milk' && e.slot === 'Evening') by[e.date].milkE += e.qty;
+      else if (e.item === 'Milk') by[e.date].milkM += e.qty;
+      else if (e.item === 'Newspaper') by[e.date].news += e.qty;
+      else by[e.date].other += e.qty;
+      by[e.date].amt += e.qty * e.rate;
+    });
+    var dates = Object.keys(by).sort();
+    var tM = 0, tE = 0, tN = 0, tA = 0;
+    dates.forEach(function (d) { tM += by[d].milkM; tE += by[d].milkE; tN += by[d].news; tA += by[d].amt; });
+    document.getElementById('cRegSummary').innerHTML =
+      '<div class="summary-box"><div class="label">दूध सुबह</div><div class="value">' + tM + '</div></div>' +
+      '<div class="summary-box"><div class="label">दूध शाम</div><div class="value">' + tE + '</div></div>' +
+      '<div class="summary-box"><div class="label">अखबार</div><div class="value">' + tN + '</div></div>' +
+      '<div class="summary-box"><div class="label">कुल ₹</div><div class="value">' + tA.toFixed(0) + '</div></div>';
+    var rows = dates.map(function (d) {
+      return '<tr><td>' + toDisplay(d) + '</td><td>' + (by[d].milkM || '-') + '</td><td>' + (by[d].milkE || '-') + '</td><td>' + (by[d].news || '-') + '</td><td>' + (by[d].other || '-') + '</td><td>₹' + by[d].amt.toFixed(0) + '</td></tr>';
+    }).join('');
+    document.getElementById('cRegTable').innerHTML = dates.length
+      ? '<table class="reg"><thead><tr><th>तारीख</th><th>दूध सुबह</th><th>दूध शाम</th><th>अखबार</th><th>अन्य</th><th>₹</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      : '<div class="empty-state">कोई डेटा नहीं</div>';
+  }
+  function renderCPay() {
+    fillMonths(['cPayMonth']);
+    var vendors = [];
+    C.payments.forEach(function (p) { if (p.vendor && vendors.indexOf(p.vendor) < 0) vendors.push(p.vendor); });
+    document.getElementById('cVendorList').innerHTML = vendors.map(function (v) { return '<option value="' + v + '">'; }).join('');
+    var m = document.getElementById('cPayMonth').value;
+    var list = C.payments.filter(function (p) { return monthKey(p.date) === m; }).sort(function (a, b) { return b.date.localeCompare(a.date); });
+    var el = document.getElementById('cPayList');
+    if (!list.length) { el.innerHTML = '<div class="empty-state">कोई पेमेंट नहीं</div>'; return; }
+    el.innerHTML = list.map(function (p) {
+      return '<div class="entry-item"><div><strong>' + toDisplay(p.date) + '</strong><div class="hint">' + (p.vendor || '—') + (p.note ? ' • ' + p.note : '') + '</div></div><div style="display:flex;gap:8px;align-items:center;"><span class="entry-amount" style="color:var(--success);">₹' + p.amount + '</span><button type="button" class="btn btn-sm btn-danger" data-pdel="' + p.id + '">🗑️</button></div></div>';
+    }).join('');
+    el.querySelectorAll('[data-pdel]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        C.payments = C.payments.filter(function (p) { return p.id != b.dataset.pdel; });
+        saveC(C); renderCPay();
+      });
+    });
+  }
+  function cRefreshAll() {
+    var r = populateItems('cItem', C.items, C.rates);
+    document.getElementById('cRate').value = r;
+    document.getElementById('cRateMilk').value = C.rates.Milk || 60;
+    document.getElementById('cRateNews').value = C.rates.Newspaper || 10;
+    document.getElementById('cRateOther').value = C.rates.Other || 20;
+    cUpdateSlots();
+    fillMonths(['cLogMonth', 'cRegMonth', 'cPayMonth']);
+  }
+
+  /* ========== VENDOR LOGIC ========== */
+  function vHasSlot(cid, date, item, slot) {
+    return V.entries.some(function (e) { return e.customerId == cid && e.date === date && e.item === item && e.slot === slot; });
+  }
+  function vHasOnce(cid, date, item) {
+    return V.entries.some(function (e) { return e.customerId == cid && e.date === date && e.item === item; });
+  }
+  function fillCustSelects() {
+    var opts = '<option value="">-- कस्टमर चुनें --</option>' + V.customers.map(function (c) {
+      return '<option value="' + c.id + '">' + c.name + '</option>';
+    }).join('');
+    ['vEntryCust', 'vLogCust', 'vRegCust', 'vBillCust'].forEach(function (id) {
+      var sel = document.getElementById(id);
+      var cur = sel.value;
+      sel.innerHTML = opts;
+      if (cur) sel.value = cur;
+    });
+  }
+  function vMonths() {
+    var s = {};
+    V.entries.forEach(function (e) { s[monthKey(e.date)] = 1; });
+    s[todayISO().slice(0, 7)] = 1;
+    return Object.keys(s).sort().reverse();
+  }
+  function fillVMonths(ids) {
+    var months = vMonths();
+    ids.forEach(function (id) {
+      var sel = document.getElementById(id);
+      var cur = sel.value;
+      sel.innerHTML = months.map(function (m) { return '<option value="' + m + '">' + monthName(m) + '</option>'; }).join('');
+      if (cur && months.indexOf(cur) >= 0) sel.value = cur;
+      else if (months.length) sel.value = months[0];
+    });
+  }
+  function vUpdateSlots() {
+    var item = document.getElementById('vItem').value;
+    var date = document.getElementById('vDateHid').value;
+    var cid = parseInt(document.getElementById('vEntryCust').value, 10);
+    var it = getItem(V.items, item);
+    var box = document.getElementById('vSlotBox');
+    var info = document.getElementById('vInfo');
+    var save = document.getElementById('vSave');
+    var hint = document.getElementById('vItemHint');
+    vSlot = null;
+    document.getElementById('vSlotM').classList.remove('active');
+    document.getElementById('vSlotE').classList.remove('active');
+    if (!cid) {
+      box.classList.remove('show');
+      info.textContent = '⚠️ पहले कस्टमर चुनें';
+      info.classList.add('show');
+      save.disabled = true;
+      return;
+    }
+    if (it && it.slots) {
+      hint.textContent = '✓ सुबह/शाम ऑन';
+      box.classList.add('show');
+      info.classList.remove('show');
+      var mT = vHasSlot(cid, date, item, 'Morning');
+      var eT = vHasSlot(cid, date, item, 'Evening');
+      document.getElementById('vSlotM').disabled = mT;
+      document.getElementById('vSlotE').disabled = eT;
+      document.getElementById('vStM').textContent = mT ? '✓ सेव है' : 'उपलब्ध';
+      document.getElementById('vStE').textContent = eT ? '✓ सेव है' : 'उपलब्ध';
+      if (mT && eT) { info.textContent = '⚠️ सुबह+शाम दोनों हो चुकीं'; info.classList.add('show'); save.disabled = true; }
+      else save.disabled = false;
+    } else {
+      hint.textContent = '1 बार/दिन';
+      box.classList.remove('show');
+      if (item && vHasOnce(cid, date, item)) {
+        info.textContent = '⚠️ आज यह आइटम पहले से है';
+        info.classList.add('show');
+        save.disabled = true;
+      } else { info.classList.remove('show'); save.disabled = false; }
+    }
+  }
+  function vAddEntry(cid, date, item, qty, rate, note, slot) {
+    if (!cid) { toast('कस्टमर चुनें'); return false; }
+    var it = getItem(V.items, item);
+    if (it && it.slots) {
+      if (!slot) { toast('सुबह/शाम चुनें'); return false; }
+      if (vHasSlot(cid, date, item, slot)) { toast('स्लॉट पहले से है'); return false; }
+    } else if (vHasOnce(cid, date, item)) { toast('आज पहले से सेव है'); return false; }
+    V.entries.push({ id: uid(), customerId: cid, date: date, item: item, qty: qty, rate: rate, note: note || '', slot: slot || null });
+    saveV(V);
+    toast('✅ सेव');
+    vUpdateSlots();
+    return true;
+  }
+  function renderVCust() {
+    var el = document.getElementById('vCustList');
+    if (!V.customers.length) { el.innerHTML = '<div class="empty-state">कोई कस्टमर नहीं</div>'; return; }
+    el.innerHTML = V.customers.map(function (c) {
+      return '<div class="cust-card"><div><strong>' + c.name + '</strong><div class="hint">' + (c.phone || '') + (c.address ? ' • ' + c.address : '') + '</div></div><button type="button" class="btn btn-sm btn-danger" data-cdel="' + c.id + '">🗑️</button></div>';
+    }).join('');
+    el.querySelectorAll('[data-cdel]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (!confirm('कस्टमर और उनकी एंट्री हटाएँ?')) return;
+        var id = parseInt(b.dataset.cdel, 10);
+        V.customers = V.customers.filter(function (c) { return c.id !== id; });
+        V.entries = V.entries.filter(function (e) { return e.customerId !== id; });
+        saveV(V); renderVCust(); fillCustSelects(); toast('हटाया');
+      });
+    });
+  }
+  function renderVLog() {
+    fillCustSelects(); fillVMonths(['vLogMonth']);
+    var cid = parseInt(document.getElementById('vLogCust').value, 10);
+    var m = document.getElementById('vLogMonth').value;
+    var list = V.entries.filter(function (e) {
+      return (!cid || e.customerId == cid) && monthKey(e.date) === m;
+    }).sort(function (a, b) { return b.date.localeCompare(a.date); });
+    var el = document.getElementById('vLogList');
+    if (!list.length) { el.innerHTML = '<div class="empty-state">कोई एंट्री नहीं</div>'; return; }
+    el.innerHTML = list.map(function (e) {
+      var cust = V.customers.find(function (c) { return c.id == e.customerId; });
+      var it = getItem(V.items, e.item);
+      var slot = e.slot ? ' (' + (e.slot === 'Morning' ? 'सुबह' : 'शाम') + ')' : '';
+      return '<div class="entry-item"><div><strong>' + (cust ? cust.name : '?') + '</strong> <span class="badge badge-other">' + (it ? it.label : e.item) + slot + '</span><div class="hint">' + toDisplay(e.date) + ' • ' + e.qty + '×₹' + e.rate + '</div></div><div style="display:flex;gap:8px;align-items:center;"><span class="entry-amount">₹' + (e.qty * e.rate).toFixed(0) + '</span><button type="button" class="btn btn-sm btn-danger" data-edel="' + e.id + '">🗑️</button></div></div>';
+    }).join('');
+    el.querySelectorAll('[data-edel]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        V.entries = V.entries.filter(function (e) { return e.id != b.dataset.edel; });
+        saveV(V); renderVLog();
+      });
+    });
+  }
+  function renderVReg() {
+    fillCustSelects(); fillVMonths(['vRegMonth']);
+    var cid = parseInt(document.getElementById('vRegCust').value, 10);
+    var m = document.getElementById('vRegMonth').value;
+    if (!cid) {
+      document.getElementById('vRegSummary').innerHTML = '';
+      document.getElementById('vRegTable').innerHTML = '<div class="empty-state">कस्टमर चुनें</div>';
+      return;
+    }
+    var list = V.entries.filter(function (e) { return e.customerId == cid && monthKey(e.date) === m; });
+    var by = {};
+    list.forEach(function (e) {
+      if (!by[e.date]) by[e.date] = { milkM: 0, milkE: 0, news: 0, other: 0, amt: 0 };
+      if (e.item === 'Milk' && e.slot === 'Evening') by[e.date].milkE += e.qty;
+      else if (e.item === 'Milk') by[e.date].milkM += e.qty;
+      else if (e.item === 'Newspaper') by[e.date].news += e.qty;
+      else by[e.date].other += e.qty;
+      by[e.date].amt += e.qty * e.rate;
+    });
+    var dates = Object.keys(by).sort();
+    var tM = 0, tE = 0, tN = 0, tA = 0;
+    dates.forEach(function (d) { tM += by[d].milkM; tE += by[d].milkE; tN += by[d].news; tA += by[d].amt; });
+    document.getElementById('vRegSummary').innerHTML =
+      '<div class="summary-box"><div class="label">सुबह</div><div class="value">' + tM + '</div></div>' +
+      '<div class="summary-box"><div class="label">शाम</div><div class="value">' + tE + '</div></div>' +
+      '<div class="summary-box"><div class="label">अखबार</div><div class="value">' + tN + '</div></div>' +
+      '<div class="summary-box"><div class="label">₹</div><div class="value">' + tA.toFixed(0) + '</div></div>';
+    document.getElementById('vRegTable').innerHTML = dates.length
+      ? '<table class="reg"><thead><tr><th>तारीख</th><th>सुबह</th><th>शाम</th><th>अखबार</th><th>अन्य</th><th>₹</th></tr></thead><tbody>' +
+        dates.map(function (d) {
+          return '<tr><td>' + toDisplay(d) + '</td><td>' + (by[d].milkM || '-') + '</td><td>' + (by[d].milkE || '-') + '</td><td>' + (by[d].news || '-') + '</td><td>' + (by[d].other || '-') + '</td><td>₹' + by[d].amt.toFixed(0) + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="empty-state">कोई डेटा नहीं</div>';
+  }
+  function vRefreshAll() {
+    fillCustSelects();
+    var r = populateItems('vItem', V.items, V.config);
+    document.getElementById('vRate').value = r;
+    document.getElementById('vRateMilk').value = V.config.Milk || 60;
+    document.getElementById('vRateNews').value = V.config.Newspaper || 10;
+    document.getElementById('vRateOther').value = V.config.Other || 20;
+    document.getElementById('vName').value = V.config.vendorName || '';
+    document.getElementById('vPhone').value = V.config.vendorPhone || '';
+    vUpdateSlots();
+    fillVMonths(['vLogMonth', 'vRegMonth', 'vBillMonth']);
+    renderVCust();
+  }
+
+  /* ========== EVENTS: CUSTOMER ========== */
+  setupDate('cDateDisp', 'cDateHid', 'cCalBtn', cUpdateSlots);
+  setupDate('cPayDateDisp', 'cPayDateHid', 'cPayCal');
+  buildQtyGrid('cQtyGrid', 'cQtyManual', cQty);
+
+  document.getElementById('cItem').addEventListener('change', function () {
+    document.getElementById('cRate').value = C.rates[this.value] || C.rates.Other || 20;
+    cUpdateSlots();
+  });
+  document.getElementById('cSlotM').addEventListener('click', function () {
+    if (this.disabled) return;
+    cSlot = 'Morning'; this.classList.add('active');
+    document.getElementById('cSlotE').classList.remove('active');
+  });
+  document.getElementById('cSlotE').addEventListener('click', function () {
+    if (this.disabled) return;
+    cSlot = 'Evening'; this.classList.add('active');
+    document.getElementById('cSlotM').classList.remove('active');
+  });
+  document.getElementById('cSave').addEventListener('click', function () {
+    var item = document.getElementById('cItem').value;
+    var it = getItem(C.items, item);
+    var qty = getQty(cQty, 'cQtyManual');
+    if (!qty) { toast('मात्रा चुनें'); return; }
+    if (it && it.slots && !cSlot) { toast('सुबह/शाम चुनें'); return; }
+    cAddEntry(
+      document.getElementById('cDateHid').value, item, qty,
+      parseFloat(document.getElementById('cRate').value) || 0,
+      document.getElementById('cNote').value,
+      it && it.slots ? cSlot : null
+    );
+  });
+  document.getElementById('cAddItem').addEventListener('click', function () {
+    var name = prompt('नया आइटम नाम:');
+    if (!name || !name.trim()) return;
+    var slots = confirm('सुबह/शाम चाहिए?\nOK = हाँ');
+    var id = 'item_' + uid();
+    C.items.push({ id: id, label: '📦 ' + name.trim(), slots: slots });
+    C.rates[id] = C.rates.Other || 20;
+    saveC(C);
+    document.getElementById('cRate').value = populateItems('cItem', C.items, C.rates);
+    document.getElementById('cItem').value = id;
+    cUpdateSlots();
+    toast('आइटम जोड़ा');
+  });
+  document.getElementById('cToggleSlot').addEventListener('click', function () {
+    var id = document.getElementById('cItem').value;
+    var it = getItem(C.items, id);
+    if (!it) return;
+    it.slots = !it.slots;
+    saveC(C);
+    populateItems('cItem', C.items, C.rates);
+    document.getElementById('cItem').value = id;
+    cUpdateSlots();
+    toast(it.slots ? '🕐 ऑन' : 'ऑफ');
+  });
+  document.getElementById('cDelItem').addEventListener('click', function () {
+    if (C.items.length <= 1) { toast('कम से कम 1 आइटम रखें'); return; }
+    var id = document.getElementById('cItem').value;
+    if (!confirm('हटाएँ?')) return;
+    C.items = C.items.filter(function (i) { return i.id !== id; });
+    saveC(C);
+    document.getElementById('cRate').value = populateItems('cItem', C.items, C.rates);
+    cUpdateSlots();
+  });
+  function cQuick(item, slot) {
+    document.getElementById('cDateHid').value = todayISO();
+    document.getElementById('cDateDisp').value = toDisplay(todayISO());
+    document.getElementById('cItem').value = item;
+    document.getElementById('cRate').value = C.rates[item] || 20;
+    cUpdateSlots();
+    var qty = getQty(cQty, 'cQtyManual') || 1;
+    cAddEntry(todayISO(), item, qty, C.rates[item] || 20, '', slot);
+  }
+  document.getElementById('cQuickM').addEventListener('click', function () { cQuick('Milk', 'Morning'); });
+  document.getElementById('cQuickE').addEventListener('click', function () { cQuick('Milk', 'Evening'); });
+  document.getElementById('cQuickN').addEventListener('click', function () { cQuick('Newspaper', null); });
+  document.getElementById('cLogMonth').addEventListener('change', renderCLog);
+  document.getElementById('cRegMonth').addEventListener('change', renderCReg);
+  document.getElementById('cPayMonth').addEventListener('change', renderCPay);
+  document.getElementById('cPaySave').addEventListener('click', function () {
+    var amt = parseFloat(document.getElementById('cPayAmt').value);
+    if (!amt) { toast('राशि लिखें'); return; }
+    C.payments.push({
+      id: uid(),
+      date: document.getElementById('cPayDateHid').value || todayISO(),
+      amount: amt,
+      vendor: document.getElementById('cPayVendor').value.trim(),
+      note: document.getElementById('cPayNote').value.trim()
+    });
+    saveC(C);
+    document.getElementById('cPayAmt').value = '';
+    toast('पेमेंट सेव');
+    renderCPay();
+  });
+  document.getElementById('cSaveRates').addEventListener('click', function () {
+    C.rates.Milk = parseFloat(document.getElementById('cRateMilk').value) || 60;
+    C.rates.Newspaper = parseFloat(document.getElementById('cRateNews').value) || 10;
+    C.rates.Other = parseFloat(document.getElementById('cRateOther').value) || 20;
+    saveC(C); toast('रेट सेव');
+  });
+  document.getElementById('cExport').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(C, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'customer-diary-' + todayISO() + '.json';
+    a.click();
+  });
+  document.getElementById('cImport').addEventListener('click', function () { document.getElementById('cImportFile').click(); });
+  document.getElementById('cImportFile').addEventListener('change', function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        C = JSON.parse(r.result);
+        saveC(C); cRefreshAll(); toast('इंपोर्ट OK');
+      } catch (err) { toast('गलत फाइल'); }
+    };
+    r.readAsText(f);
+  });
+  document.getElementById('cClear').addEventListener('click', function () {
+    if (!confirm('सारा डेटा मिटेगा?')) return;
+    C = { entries: [], payments: [], rates: { Milk: 60, Newspaper: 10, Other: 20 }, items: [
+      { id: 'Milk', label: '🥛 दूध', slots: true },
+      { id: 'Newspaper', label: '📰 अखबार', slots: false },
+      { id: 'Other', label: '📦 अन्य', slots: false }
+    ]};
+    saveC(C); cRefreshAll(); toast('मिट गया');
+  });
+  document.getElementById('cPrintReg').addEventListener('click', function () {
+    renderCReg();
+    var m = document.getElementById('cRegMonth').value;
+    document.getElementById('printArea').innerHTML = '<h2 style="text-align:center;">Daily Diary Register</h2><p style="text-align:center;">' + monthName(m) + '</p>' + document.getElementById('cRegSummary').innerHTML + document.getElementById('cRegTable').innerHTML;
+    document.getElementById('printArea').style.display = 'block';
+    window.print();
+    setTimeout(function () { document.getElementById('printArea').style.display = 'none'; }, 500);
+  });
+
+  /* ========== EVENTS: VENDOR ========== */
+  setupDate('vDateDisp', 'vDateHid', 'vCalBtn', vUpdateSlots);
+  buildQtyGrid('vQtyGrid', 'vQtyManual', vQty);
+
+  document.getElementById('vCustSave').addEventListener('click', function () {
+    var name = document.getElementById('vCustName').value.trim();
+    if (!name) { toast('नाम लिखें'); return; }
+    V.customers.push({
+      id: uid(),
+      name: name,
+      phone: document.getElementById('vCustPhone').value.trim(),
+      address: document.getElementById('vCustAddr').value.trim()
+    });
+    saveV(V);
+    document.getElementById('vCustName').value = '';
+    document.getElementById('vCustPhone').value = '';
+    document.getElementById('vCustAddr').value = '';
+    renderVCust(); fillCustSelects(); toast('कस्टमर सेव');
+  });
+  document.getElementById('vEntryCust').addEventListener('change', vUpdateSlots);
+  document.getElementById('vItem').addEventListener('change', function () {
+    document.getElementById('vRate').value = V.config[this.value] || V.config.Other || 20;
+    vUpdateSlots();
+  });
+  document.getElementById('vSlotM').addEventListener('click', function () {
+    if (this.disabled) return;
+    vSlot = 'Morning'; this.classList.add('active');
+    document.getElementById('vSlotE').classList.remove('active');
+  });
+  document.getElementById('vSlotE').addEventListener('click', function () {
+    if (this.disabled) return;
+    vSlot = 'Evening'; this.classList.add('active');
+    document.getElementById('vSlotM').classList.remove('active');
+  });
+  document.getElementById('vSave').addEventListener('click', function () {
+    var item = document.getElementById('vItem').value;
+    var it = getItem(V.items, item);
+    var qty = getQty(vQty, 'vQtyManual');
+    var cid = parseInt(document.getElementById('vEntryCust').value, 10);
+    if (!qty) { toast('मात्रा चुनें'); return; }
+    if (it && it.slots && !vSlot) { toast('सुबह/शाम चुनें'); return; }
+    vAddEntry(cid, document.getElementById('vDateHid').value, item, qty,
+      parseFloat(document.getElementById('vRate').value) || 0,
+      document.getElementById('vNote').value,
+      it && it.slots ? vSlot : null);
+  });
+  document.getElementById('vAddItem').addEventListener('click', function () {
+    var name = prompt('नया आइटम:');
+    if (!name || !name.trim()) return;
+    var slots = confirm('सुबह/शाम?\nOK = हाँ');
+    var id = 'item_' + uid();
+    V.items.push({ id: id, label: '📦 ' + name.trim(), slots: slots });
+    V.config[id] = V.config.Other || 20;
+    saveV(V);
+    document.getElementById('vRate').value = populateItems('vItem', V.items, V.config);
+    document.getElementById('vItem').value = id;
+    vUpdateSlots();
+  });
+  document.getElementById('vToggleSlot').addEventListener('click', function () {
+    var id = document.getElementById('vItem').value;
+    var it = getItem(V.items, id);
+    if (!it) return;
+    it.slots = !it.slots;
+    saveV(V);
+    populateItems('vItem', V.items, V.config);
+    document.getElementById('vItem').value = id;
+    vUpdateSlots();
+  });
+  document.getElementById('vDelItem').addEventListener('click', function () {
+    if (V.items.length <= 1) return;
+    var id = document.getElementById('vItem').value;
+    if (!confirm('हटाएँ?')) return;
+    V.items = V.items.filter(function (i) { return i.id !== id; });
+    saveV(V);
+    document.getElementById('vRate').value = populateItems('vItem', V.items, V.config);
+    vUpdateSlots();
+  });
+  function vQuick(item, slot) {
+    var cid = parseInt(document.getElementById('vEntryCust').value, 10);
+    if (!cid) { toast('कस्टमर चुनें'); return; }
+    document.getElementById('vDateHid').value = todayISO();
+    document.getElementById('vDateDisp').value = toDisplay(todayISO());
+    document.getElementById('vItem').value = item;
+    document.getElementById('vRate').value = V.config[item] || 20;
+    vUpdateSlots();
+    vAddEntry(cid, todayISO(), item, getQty(vQty, 'vQtyManual') || 1, V.config[item] || 20, '', slot);
+  }
+  document.getElementById('vQuickM').addEventListener('click', function () { vQuick('Milk', 'Morning'); });
+  document.getElementById('vQuickE').addEventListener('click', function () { vQuick('Milk', 'Evening'); });
+  document.getElementById('vQuickN').addEventListener('click', function () { vQuick('Newspaper', null); });
+  document.getElementById('vLogCust').addEventListener('change', renderVLog);
+  document.getElementById('vLogMonth').addEventListener('change', renderVLog);
+  document.getElementById('vRegCust').addEventListener('change', renderVReg);
+  document.getElementById('vRegMonth').addEventListener('change', renderVReg);
+  document.getElementById('vGenBill').addEventListener('click', function () {
+    var cid = parseInt(document.getElementById('vBillCust').value, 10);
+    var m = document.getElementById('vBillMonth').value;
+    var cust = V.customers.find(function (c) { return c.id == cid; });
+    if (!cust) { toast('कस्टमर चुनें'); return; }
+    var list = V.entries.filter(function (e) { return e.customerId == cid && monthKey(e.date) === m; });
+    var total = 0, milkM = 0, milkE = 0, news = 0;
+    list.forEach(function (e) {
+      total += e.qty * e.rate;
+      if (e.item === 'Milk' && e.slot === 'Evening') milkE += e.qty;
+      else if (e.item === 'Milk') milkM += e.qty;
+      else if (e.item === 'Newspaper') news += e.qty;
+    });
+    var lines = [];
+    lines.push('🧾 बिल - ' + monthName(m));
+    lines.push('कस्टमर: ' + cust.name);
+    if (V.config.vendorName) lines.push('वेंडर: ' + V.config.vendorName);
+    lines.push('--------------------');
+    lines.push('दूध सुबह: ' + milkM);
+    lines.push('दूध शाम: ' + milkE);
+    lines.push('अखबार: ' + news);
+    lines.push('--------------------');
+    lines.push('कुल राशि: ₹' + total.toFixed(0));
+    lines.push('धन्यवाद!');
+    lastBill = lines.join('\n');
+    document.getElementById('vBillText').textContent = lastBill;
+    document.getElementById('vBillPreview').style.display = 'block';
+  });
+  document.getElementById('vWaShare').addEventListener('click', function () {
+    if (!lastBill) return;
+    var cid = parseInt(document.getElementById('vBillCust').value, 10);
+    var cust = V.customers.find(function (c) { return c.id == cid; });
+    var phone = (cust && cust.phone) ? cust.phone.replace(/\D/g, '') : '';
+    if (phone.length === 10) phone = '91' + phone;
+    var url = phone
+      ? 'https://wa.me/' + phone + '?text=' + encodeURIComponent(lastBill)
+      : 'https://wa.me/?text=' + encodeURIComponent(lastBill);
+    window.open(url, '_blank');
+  });
+  document.getElementById('vCopyBill').addEventListener('click', function () {
+    if (!lastBill) return;
+    if (navigator.clipboard) navigator.clipboard.writeText(lastBill).then(function () { toast('कॉपी हो गया'); });
+    else toast('कॉपी सपोर्ट नहीं');
+  });
+  document.getElementById('vSaveCfg').addEventListener('click', function () {
+    V.config.vendorName = document.getElementById('vName').value.trim();
+    V.config.vendorPhone = document.getElementById('vPhone').value.trim();
+    V.config.Milk = parseFloat(document.getElementById('vRateMilk').value) || 60;
+    V.config.Newspaper = parseFloat(document.getElementById('vRateNews').value) || 10;
+    V.config.Other = parseFloat(document.getElementById('vRateOther').value) || 20;
+    saveV(V); toast('सेव');
+  });
+  document.getElementById('vExport').addEventListener('click', function () {
+    var blob = new Blob([JSON.stringify(V, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'vendor-diary-' + todayISO() + '.json';
+    a.click();
+  });
+  document.getElementById('vImport').addEventListener('click', function () { document.getElementById('vImportFile').click(); });
+  document.getElementById('vImportFile').addEventListener('change', function (e) {
+    var f = e.target.files[0]; if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      try { V = JSON.parse(r.result); saveV(V); vRefreshAll(); toast('इंपोर्ट OK'); }
+      catch (err) { toast('गलत फाइल'); }
+    };
+    r.readAsText(f);
+  });
+  document.getElementById('vClear').addEventListener('click', function () {
+    if (!confirm('सारा वेंडर डेटा मिटेगा?')) return;
+    V = { customers: [], entries: [], payments: [], config: { Milk: 60, Newspaper: 10, Other: 20, vendorName: '', vendorPhone: '' }, items: [
+      { id: 'Milk', label: '🥛 दूध', slots: true },
+      { id: 'Newspaper', label: '📰 अखबार', slots: false },
+      { id: 'Other', label: '📦 अन्य', slots: false }
+    ]};
+    saveV(V); vRefreshAll(); toast('मिट गया');
+  });
+  document.getElementById('vPrintReg').addEventListener('click', function () {
+    renderVReg();
+    var cid = parseInt(document.getElementById('vRegCust').value, 10);
+    var cust = V.customers.find(function (c) { return c.id == cid; });
+    var m = document.getElementById('vRegMonth').value;
+    document.getElementById('printArea').innerHTML = '<h2 style="text-align:center;">Register - ' + (cust ? cust.name : '') + '</h2><p style="text-align:center;">' + monthName(m) + '</p>' + document.getElementById('vRegSummary').innerHTML + document.getElementById('vRegTable').innerHTML;
+    document.getElementById('printArea').style.display = 'block';
+    window.print();
+    setTimeout(function () { document.getElementById('printArea').style.display = 'none'; }, 500);
+  });
+
+  /* INIT */
+  cRefreshAll();
+  fillVMonths(['vBillMonth']);
+})();
+  </script>
+</body>
+</html>
